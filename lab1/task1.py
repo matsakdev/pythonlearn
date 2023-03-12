@@ -1,3 +1,4 @@
+# Given letter
 z = '##############\n' \
     '            #\n' \
     '           #\n' \
@@ -13,6 +14,6 @@ z = '##############\n' \
     ' #\n' \
     '##############\n'
 
-
+# Print the letter
 def print_z():
     print(z)
