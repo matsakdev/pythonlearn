@@ -18,15 +18,12 @@ def find_group_id(group_name):
 
     for faculty in groups_data['university']['faculties']:
         for direction in faculty['directions']:
-            print('[direction]', direction)
             for speciality in direction['specialities']:
                 for group in speciality['groups']:
                     if group['name'] == group_name:
                         return group['id']
             if 'groups' in direction:
-                print('groups in direction')
                 for group in direction['groups']:
-                    print('[group]', group)
                     if group['name'] == group_name:
                         return group['id']
 
@@ -85,7 +82,7 @@ def print_schedule_by_week(group_name, week):
         if week_start.date() <= event_start_time.date() <= week_end.date():
             name_subject = get_subject_by_id(event['subject_id'], subjects)
             print(
-                f"{event['number_pair']} пара: {event['auditory']}, {nameSubject}, {event_start_time.strftime('%d.%m.%Y %H:%M')} - {event_end_time.strftime('%H:%M')}")
+                f"{event['number_pair']} пара: {event['auditory']}, {name_subject}, {event_start_time.strftime('%d.%m.%Y %H:%M')} - {event_end_time.strftime('%H:%M')}")
 
 #
 # # Функція для виведення розкладу за місяць
