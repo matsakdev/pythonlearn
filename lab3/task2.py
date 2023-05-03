@@ -17,15 +17,14 @@ def find_group_id(group_name):
     groups_data = response.json()
 
     for faculty in groups_data['university']['faculties']:
-        print(faculty)
         for direction in faculty['directions']:
-            print(direction)
             for speciality in direction['specialities']:
-                print(speciality)
                 for group in speciality['groups']:
-                    print(group)
                     if group['name'] == group_name:
                         return group['id']
+            for group in direction['groups']:
+                if group['name'] == group_name:
+                    return group['id']
 
 def get_subject_by_id(id, subjects):
     for subject in subjects:
