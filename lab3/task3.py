@@ -1,58 +1,46 @@
-# Отримуємо JSON з розкладом групи за допомогою запиту GET
-from datetime import datetime
+import datetime
 
 import requests
 
-response = requests.get('https://cist.nure.ua/ias/app/tt/P_API_EVEN_JSON?type_id=3&timetable_id=56&idClient=KNURESked')
-
-# Дістаємо JSON із резпонзу
-json_data = response.json()
-
-teachers = [teacher for teacher in json_data['teachers']]
-groups = [groups for groups in json_data['groups']]
+from lab3.constants import BASE_API_URL
 
 
-def get_today_events():
-    events = json_data['events']
+def get_auditory_id(auditory_name):
+    # Отримуємо JSON з переліком аудиторій
+    response = requests.get(f'{BASE_API_URL}/P_API_AUDITORIES_JSON')
+    auditories_data = response.json()
 
-    today = datetime.date.today().strftime('%Y-%m-%d')
-
-    events_today = []
-    for event in events:
-        if datetime.date.fromtimestamp(event['start_time']).strftime('%Y-%m-%d') == today:
-            events_today.append(event)
-
-    return events_today
+    for building in auditories_data['university']['buildings']:
+        for auditory in building['auditories']:
+            if auditory['short_name'] == auditory_name:
+                return auditory['id']
 
 
-# Функція для конвертування timestamp у datetime
-def timestamp_to_datetime(timestamp):
-    return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+def print_results(teachers, groups, auditory):
+    print(f'Групи та викладачі в аудиторії {auditory} сьогодні:')
+
+    print('*Групи*')
+    print(list(map((lambda group: group['name']), groups)))
+    print('\n*Викладачі*')
+    print(list(map((lambda teacher: teacher['full_name']), teachers)))
 
 
-# Функція для виведення подій за добу
-def print_schedule_by_day():
-    today = datetime.date.today().strftime('%Y-%m-%d')
+def print_today_events(auditory_name):
+    # Шукаємо потрібну аудиторію
+    auditory_id = get_auditory_id(auditory_name)
 
-    print('Групи та викладачі в аудиторії 309і у: ', today)
-    events = get_today_events()
-    for event in events:
-        for teacher in event['teachers']:
-            print(get_teacher_by_id(teacher))
-        for group in event['groups']:
-            print(get_group_by_id(group))
+    # Визначаємо початок та кінець сьогоднішнього дня
+    start_of_day = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
+    end_of_day = datetime.datetime.today().replace(hour=23, minute=59, second=59, microsecond=999999).timestamp()
 
+    response = requests.get(
+        f'https://cist.nure.ua/ias/app/tt/P_API_EVEN_JSON?type_id=3&timetable_id={auditory_id}'
+        f'&time_from={start_of_day}&time_to={end_of_day}&idClient=KNURESked')
 
-def get_teacher_by_id(id):
-    for teacher in teachers:
-        if teacher['id'] == id:
-            return teacher['full_name']
+    # Дістаємо JSON із відповіді
+    json_data = response.json()
 
+    teachers = json_data['teachers']
+    groups = json_data['groups']
 
-def get_group_by_id(id):
-    for group in groups:
-        if group['id'] == id:
-            return group['name']
-
-
-print_schedule_by_day()
+    print_results(teachers, groups, auditory_name)
