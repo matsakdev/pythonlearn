@@ -30,12 +30,15 @@ def print_today_events(auditory_name):
     auditory_id = get_auditory_id(auditory_name)
 
     # Визначаємо початок та кінець сьогоднішнього дня
-    start_of_day = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
-    end_of_day = datetime.datetime.today().replace(hour=23, minute=59, second=59, microsecond=999999).timestamp()
+    start_of_day = round(datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0).timestamp())
+    end_of_day = round(datetime.datetime.today().replace(hour=23, minute=59, second=59, microsecond=999999).timestamp())
 
-    response = requests.get(
-        f'https://cist.nure.ua/ias/app/tt/P_API_EVEN_JSON?type_id=3&timetable_id={auditory_id}'
+    # Складаємо рядок запиту, type_id=3 (для аудиторій)
+
+    query = (f'https://cist.nure.ua/ias/app/tt/P_API_EVEN_JSON?type_id=3&timetable_id={auditory_id}'
         f'&time_from={start_of_day}&time_to={end_of_day}&idClient=KNURESked')
+
+    response = requests.get(query)
 
     # Дістаємо JSON із відповіді
     json_data = response.json()
